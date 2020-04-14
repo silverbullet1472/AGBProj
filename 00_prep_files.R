@@ -1,41 +1,49 @@
 rm(list = ls())
-# 1 rename some metrics ####
-plots <- read.csv(file="../ModelData/plots479_newAGBs_nocoor.csv", head=T)
-l8 <- read.csv(file="../ModelData/plots479_l8_vars.csv", head=T)
-s1 <- read.csv(file="../ModelData/plots479_s1_vars.csv", head=T)
-p2 <- read.csv(file="../ModelData/plots479_p2_vars.csv", head=T)
-dem <- read.csv(file="../ModelData/plots479_dem_vars.csv", head=T)
+# 1 rename and romeve some metrics ####
+plots <-read.csv(file="./ModelData/plots479_field_newAGBs_Fids.csv", head=T)
+l8 <- read.csv(file="./ModelData/plots479_l8_vars.csv", head=T)
+s1 <- read.csv(file="./ModelData/plots479_s1_vars.csv", head=T)
+p2 <- read.csv(file="./ModelData/plots479_p2_vars.csv", head=T)
+dem <- read.csv(file="./ModelData/plots479_dem_vars.csv", head=T)
 
-## 1.0 fix AveAGB
+## 1.0 fix AveAGB bug
 plots$AveAGB <- plots$AveAGB/4
 
-## 1.1 plots file
+## 1.1 plots file 
 t <- colnames(plots);t
-t[2] <- "Radius"
-t[5:13] <- c("AveDBH","AveHt.1","BasalArWtHt.1","CrownArWtHt","Den","AveBasalAr","AveHt.2","BasalArWtHt.2","AveAGB")
+plots[c("YDH","YDXH","YDMZGUID","YU_BI_DU","SHU_G_MAX","SHU_G_MIN","SGMJJQ")] <- NULL
+t <- colnames(plots);t
+t[2] <- "AveDBH"; t[3] <- "AveHt.1"; t[4] <- "BasalArWtHt.1"; t[6:8] <- c("AveBasalAr","AveHt.2","BasalArWtHt.2")
 colnames(plots) <- t;t
 
 ## 1.2 landsat file
 t <- colnames(l8);t
-t[2] <- "Radius";t[5] <- "l8r"
+l8[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
+t <- colnames(l8);t
+t[2] <- "l8r"
 colnames(l8) <- t;t
 
 ## 1.3 sentinel-1 file
 t <- colnames(s1);t
-t[2] <- "Radius";t[5] <- "s1vv";t[9:10] <- c("s1vvmd","s1vhmd")
+s1[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
+t <- colnames(s1);t
+t[2] <- "s1vv";t[6:7] <- c("s1vvmd","s1vhmd")
 colnames(s1) <- t;t
 
-## 1.3 palsar-2 file
+## 1.4 palsar-2 file
 t <- colnames(p2);t
-t[2] <- "Radius";t[5] <- "p2hh"
+p2[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
+t <- colnames(p2);t
+t[2] <- "p2hh"
 colnames(p2) <- t;t
 
-## 1.4 dem file
+## 1.5 dem file
 t <- colnames(dem);t
-t[2] <- "Radius"
-colnames(dem) <- t;t
+dem[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
+t <- colnames(dem);t
 
 #  2 calculate sar indexs ####
+
 ## 2.1 convert sar to db
 ### 2.1.1 for sentinel-1
 pow2db <- function(p){
@@ -92,7 +100,6 @@ calc_evi <- function(B,R,NIR){
 calc_evi2 <- function(R,NIR){
   return (2.5*(NIR - R)/(1 + NIR + 2.4*R))
 }
-
 # Ratio Vegetation Index	
 calc_rvi <- function(R,NIR){
   return (NIR/R)
@@ -113,6 +120,7 @@ calc_tcg <- function(B, G, R, NIR, SWIR1, SWIR2){
 calc_tcwgd <- function(TCW,TCG){
   return (TCW - TCG)
 }
+
 ### 3.2 process l8 file #####
 colnames(l8)
 l8$l8ndvi=calc_ndvi(l8$l8nir,l8$l8r)
@@ -133,19 +141,19 @@ write.csv(dem, row.names=FALSE, file="./dem.csv")
 
 # 5 merge files ####
 merge_list <- list(plots,dem,s1,p2,l8)
-merged_data <- Reduce(function(x,y) merge(x,y,by=c("FIDs","Radius","YDH","YDMZGUID")),merge_list)
+merged_data <- Reduce(function(x,y) merge(x,y,by="FIDs"),merge_list)
 write.csv(merged_data, row.names=FALSE, file="./merged_data.csv")
 
 # 6 quick plot to form intuition about data ####
 # 6.1 plots file
 colnames(plots)
 par(mfrow=(c(2,3)))
-hist(plots$AveHt.1,freq = F,breaks = 100)
-hist(plots$AveHt.2,freq = F,breaks = 100)
-hist(plots$AveDBH,freq = F)
-hist(plots$AveBasalAr,freq = F,breaks = 50)
-hist(plots$Den,freq = F)
-hist(plots$AveAGB,freq = F,breaks = 200)
+hist(plots$AveHt.1,freq = T,breaks = 100)
+hist(plots$AveHt.2,freq = T,breaks = 100)
+hist(plots$AveBasalAr,freq = T,breaks = 50)
+hist(plots$BasalArWtHt.1,freq = T)
+hist(plots$BasalArWtHt.2,freq = T)
+hist(plots$AveAGB,freq = T,breaks = 200)
 
 par(mfrow=(c(2,3)))
 plot(plots$AveAGB~plots$AveDBH, pch=19)
@@ -161,3 +169,4 @@ hist(s1$s1vv,freq = F,breaks = 100)
 hist(s1$s1vh,freq = F,breaks = 100)
 hist(p2$p2hh,freq = F,breaks = 100)
 hist(p2$p2hv,freq = F,breaks = 100)
+
