@@ -106,6 +106,20 @@ d <- d[c(9,10:12)]
 d <- as.matrix(d) 
 do_corrplot(d)
 
+# agb - selected bands
+d<-read.csv(file="./merged_data.csv", head=T)
+load("sel.all.Rdata")
+d <- d[c("AveAGB",sel.all)]
+d <- as.matrix(d) 
+do_corrplot(d) 
+
+# ht.1 - selected bands
+d<-read.csv(file="./merged_data.csv", head=T)
+load("sel.ht.Rdata")
+d <- d[c("AveHt.1",sel.ht)]
+d <- as.matrix(d) 
+do_corrplot(d) 
+
 # explore data
 d <- read.csv(file="./merged_data.csv", head=T)
 summary(sort(d$AveHt.1)-sort(d$AveHt.2))
