@@ -16,7 +16,10 @@ corr <- rcorr(d)
 barplot(corr$r[1,-1],las=2)
 
 d<-read.csv(file="./merged_data.csv", head=T)
-load("sel.ht.Rdata")
-d <- d[c("AveHt.1",sel.ht)]
+d <- d[c(3,10:126)]
 d <- as.matrix(d) 
-rcorr(d)
+corr <- rcorr(d)
+barplot(corr$r[1,-1],las=2)
+
+d<-read.csv(file="./merged_data.csv", head=T)
+load("sel.ht.Rdata")
