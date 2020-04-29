@@ -31,3 +31,6 @@ rmse(data.train$AveAGB-pred.train)
 r2(data.train$AveAGB,pred.train)
 rmse(data.test$AveAGB-pred.test)
 r2(data.test$AveAGB,pred.test)
+
+
+

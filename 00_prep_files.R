@@ -1,13 +1,15 @@
 rm(list = ls())
 # 1 rename and romeve some metrics ####
 plots <-read.csv(file="./ModelData/plots479_field_newAGBs_Fids.csv", head=T)
-l8 <- read.csv(file="./ModelData/plots479_l8_vars.csv", head=T)
-s1 <- read.csv(file="./ModelData/plots479_s1_vars.csv", head=T)
-p2 <- read.csv(file="./ModelData/plots479_p2_vars.csv", head=T)
-dem <- read.csv(file="./ModelData/plots479_dem_vars.csv", head=T)
+l8 <- read.csv(file="./ModelData/plots479_l8_zstats1m.csv", head=T)
+s1 <- read.csv(file="./ModelData/plots479_s1_zstats1m.csv", head=T)
+p2 <- read.csv(file="./ModelData/plots479_p2_zstats1m.csv", head=T)
+dem <- read.csv(file="./ModelData/plots479_dem_zstats1m.csv", head=T)
 
 ## 1.0 fix AveAGB bug
+summary(plots$AveAGB)
 plots$AveAGB <- plots$AveAGB/4
+summary(plots$AveAGB)
 
 ## 1.1 plots file 
 t <- colnames(plots);t
@@ -18,29 +20,30 @@ colnames(plots) <- t;t
 
 ## 1.2 landsat file
 t <- colnames(l8);t
-l8[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
+l8[c("BAN_JING","YDH","YDMZGUID","l8cnt","l8pw","l8pf")] <- NULL;
 t <- colnames(l8);t
-t[2] <- "l8r"
-colnames(l8) <- t;t
 
 ## 1.3 sentinel-1 file
 t <- colnames(s1);t
 s1[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
 t <- colnames(s1);t
-t[2] <- "s1vv";t[6:7] <- c("s1vvmd","s1vhmd")
+t[6:7] <- c("s1vvmd","s1vhmd")
 colnames(s1) <- t;t
 
 ## 1.4 palsar-2 file
 t <- colnames(p2);t
 p2[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
 t <- colnames(p2);t
-t[2] <- "p2hh"
-colnames(p2) <- t;t
 
 ## 1.5 dem file
 t <- colnames(dem);t
 dem[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
 t <- colnames(dem);t
+
+## 1.6 texture file
+# t <- colnames(tx);t
+# tx[c("BAN_JING","YDH","YDMZGUID")] <- NULL;
+# t <- colnames(tx);t
 
 #  2 calculate sar indexs ####
 
@@ -54,13 +57,13 @@ int2db <- function(b1){
   b2=10*log10(b1^2)-83
   return (b2)
 }
-
 ## 2.2 calculate index
 calc_ndpi <- function(b1,b2){
   return ((b1-b2)/(b1+b2))
 }
 
 ## 2.3 process s1 file
+#original 6 band, get 6 new bands
 ### convert to db
 s1$s1vv=pow2db(s1$s1vv) 
 s1$s1vvmd=pow2db(s1$s1vvmd)
@@ -77,6 +80,7 @@ s1$s1npdi=calc_ndpi(s1$s1vv,s1$s1vh)
 s1$s1npdimd=calc_ndpi(s1$s1vvmd,s1$s1vhmd) 
 
 ## 2.4 process p2 file
+# original 2 bands, get 3 new bands
 ### convert to db
 p2$p2hh=int2db(p2$p2hh)
 p2$p2hv=int2db(p2$p2hv)
@@ -122,7 +126,7 @@ calc_tcwgd <- function(TCW,TCG){
 }
 
 ### 3.2 process l8 file #####
-colnames(l8)
+# original 86 bands, get 8 new bands
 l8$l8ndvi=calc_ndvi(l8$l8nir,l8$l8r)
 l8$l8evi=calc_evi(l8$l8b,l8$l8r,l8$l8nir)
 l8$l8evi2=calc_evi2(l8$l8r,l8$l8nir)
@@ -138,6 +142,7 @@ write.csv(l8, row.names=FALSE, file="./l8.csv")
 write.csv(s1, row.names=FALSE, file="./s1.csv")
 write.csv(p2, row.names=FALSE, file="./p2.csv")
 write.csv(dem, row.names=FALSE, file="./dem.csv")
+# write.csv(tx, row.names=FALSE, file="./tx.csv")
 
 # 5 merge files ####
 merge_list <- list(plots,dem,s1,p2,l8)
@@ -157,7 +162,8 @@ hist(plots$AveAGB,freq = T,breaks = 200)
 
 par(mfrow=(c(2,3)))
 plot(plots$AveAGB~plots$AveDBH, pch=19)
-plot(plots$AveAGB~plots$Den, pch=19)
+D2H <- ((plots$AveDBH/100)^2)*(plots$AveHt.1)
+plot(plots$AveAGB~D2H, pch=19)
 plot(plots$AveAGB~plots$AveHt.1, pch=19)
 plot(plots$AveAGB~plots$AveHt.2, pch=19)
 plot(plots$AveAGB~plots$BasalArWtHt.1, pch=19)

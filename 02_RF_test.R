@@ -5,6 +5,7 @@ library(randomForest)
 # 1 divide train and test sets ####
 set.seed(6666)
 data <- read.csv(file="./merged_data.csv", head=T)
+data <- na.omit(data)
 # remove possible outliners
 summary(data$AveAGB)
 hist(data$AveAGB,breaks=100)
@@ -37,7 +38,7 @@ featureTest <- function(xs,y){
                    r2.test=numeric()) 
   for (i in trees) {
     for (j in mtrys) {
-      rf.model = randomForest(x=data.train[xs], y=data.train[[y]], data=data.train, ntree=i, mtry=j,importance=TRUE)
+      rf.model = randomForest(x=data.train[xs], y=data.train[[y]], data=data.train, ntree=i, mtry=j,importance=TRUE,na.action=na.omit)
       # train data 
       pred.train = rf.model$predicted
       summary(pred.train);summary(data.train[[y]])
@@ -134,6 +135,7 @@ sel.all <- names(xs[vsurf.all$varselect.pred])
 save(sel.all, file="sel.all.Rdata")
 plot(vsurf.all)
 # 2.6.2 testing with randomForest
+load("sel.all.Rdata")
 result.all <- featureTest(sel.all,"AveAGB")
 save(result.all,file="result.all.Rdata")
 summary(result.all)
