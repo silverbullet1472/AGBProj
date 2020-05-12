@@ -1,15 +1,23 @@
+# select metrics(vsurf)
+# select best model parameters and calculate model performance(ten-fold validation)
+# build model and save as .Rdata for mapping(code in apply_rf.R)
+
 rm(list = ls())
 library(VSURF)
 library(randomForest)
 
+# set seed to same num for reproduceable results
 set.seed(1234)
+
 # read data ####
 data <- read.csv(file="./merged_data.csv", head=T)
 data <- na.omit(data)
+
 # remove possible outliners
 summary(data$AveAGB)
 hist(data$AveAGB,breaks=100)
 data <- data[data$AveAGB<250,]
+
 # look up table ####
 # FID 1
 # plot parameters 2:8
@@ -35,6 +43,7 @@ sel.rf <- names(xs[vsurf$varselect.pred])
 save(sel.rf, file="sel.rf.Rdata")
 load("sel.rf.Rdata")
 sel.rf
+
 # 10-fold validation ####
 rmse <- function(x,y)
 {
@@ -79,7 +88,7 @@ for (i in ntrees) {
     tune.rf[nrow(tune.rf)+1,] <- tenfold(i,j)
   }
 }
-
+# check best parameters
 tune.rf
 
 # model

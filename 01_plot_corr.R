@@ -1,6 +1,7 @@
+# plot corr heat plot, form intuition about data
+
 rm(list = ls())
 
-# plot correlations to from intuition about data
 library(corrplot)
 
 # 1 set up reqiured function

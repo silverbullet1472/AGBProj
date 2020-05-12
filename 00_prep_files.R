@@ -1,3 +1,5 @@
+# prep data, calculate metrics
+
 rm(list = ls())
 # 1 rename and romeve some metrics ####
 plots <-read.csv(file="./ModelData/plots479_field_newAGBs_Fids.csv", head=T)

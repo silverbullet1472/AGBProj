@@ -1,3 +1,5 @@
+# plot scatter points(pred vs reference value)
+
 rm(list=ls())
 
 library(ggplot2)

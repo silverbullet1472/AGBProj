@@ -1,5 +1,4 @@
 rm(list=ls()); gc();
-#LOAD the packages
 library('raster')
 library('rgdal')
 library('glcm')

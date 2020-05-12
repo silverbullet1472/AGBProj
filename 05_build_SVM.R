@@ -1,11 +1,16 @@
+# calculate model performance(ten-fold validation)
+# select best model parameters and build model and save as .Rdata
+
 rm(list = ls())
 
 library(e1071)
 
-##### 3.1 test run using variable selected by VSURF ######
-###### 3.1 turned svm model using all variables  #####
-## 3.1.1 tune using default parameters #####
+
 data <- read.csv(file="./merged_data.csv", head=T)
+colnames(data)
+data <- na.omit(data)
+data <- data[data$AveAGB<250,]
+data[1:8] <- NULL
 colnames(data)
 
 # FID 1
@@ -15,11 +20,6 @@ colnames(data)
 # s1 13:24 
 # p2 25:29
 # l8 30:123 (vegetation index -> 116:123)
-
-data <- na.omit(data)
-data <- data[data$AveAGB<250,]
-data[1:8] <- NULL
-colnames(data)
 
 load("sel.rf.Rdata")
 data <- data[c("AveAGB",sel.rf)]
@@ -68,10 +68,12 @@ for (i in 1:10){
   rmse.test <- rmse(data.test$AveAGB,pred.test)
   df[nrow(df)+1,] <- c(rmse.train,rmse.test,r2.train,r2.test)
 }
+
 # result
 result.svm <- c(mean(df$rmse.train),mean(df$rmse.test),mean(df$r2.train),mean(df$r2.test))
 result.svm
 save(result.svm,file="result.svm.Rdata")
+
 # model
 model.svm <- svm(AveAGB~.,data=data,epsilon=0.57,cost=4)
 save(model.svm,file="model.svm.Rdata")

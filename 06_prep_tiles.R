@@ -1,6 +1,6 @@
-# Randomforest
+# extract info in tiles to apply model 
+
 rm(list=ls()); gc();
-#LOAD the packages
 library('raster')
 library('rgdal')
 

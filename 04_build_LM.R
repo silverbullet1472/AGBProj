@@ -1,6 +1,9 @@
+# select metrics(MASS)
+# calculate model performance(ten-fold validation)
+# build model and save as .Rdata
+
 rm(list = ls())
 
-# feature selection 
 library(MASS)
 
 data <- read.csv(file="./merged_data.csv", head=T)
@@ -30,12 +33,14 @@ summary(step.for)
 step.both <- stepAIC(fit,direction = "both",trace=F)
 summary(step.both)
 
+# use metrics selected by backward stepwise regression
 sel.lm <- names(step.back$coefficients)
 sel.lm
 sel.lm <- sel.lm[2:length(sel.lm)] 
 sel.lm
 save(sel.lm,file="sel.lm.Rdata")
-# build
+
+
 # 10-fold validation ####
 rmse <- function(x,y)
 {
